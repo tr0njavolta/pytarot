@@ -1,28 +1,26 @@
 #!/opt/homebrew/bin/python3.12
+#!/opt/homebrew/bin/python3.12
 import os
 import random
-import re
+import json
 from pathlib import Path
 
-DATFILES = (Path(__file__) / '..' / 'datfiles').resolve()
+DATFILE = (Path(__file__) / '..' / 'cards.json').resolve()
 
-
-def _get_files():
-    files = os.listdir(DATFILES)
-    return [DATFILES / file for file in files]
-
+def get_cards():
+    with open(DATFILE, 'r') as f:
+        data = json.load(f)
+    return data['cards']
 
 def card():
-    paths = _get_files()
-    cards = []
-    for path in paths:
-        with open(path, 'r') as f:
-            text = re.split(r'[\n|\r\n]%[\n|\r\n]', f.read())
-        text = [cards for cards in text if cards.strip('\n\r')]
-        cards += text
-    return random.sample(cards, k=3)
+    cards = get_cards()
+    return random.choice(cards)
 
-
-print("Past:",  (card()[0]), "Reversed:", random.choice([True, False]), end="\n")
-print("Present:",  (card()[0]), "Reversed:", random.choice([True, False]), end="\n")
-print("Future:",  (card()[0]), "Reversed:", random.choice([True, False]), end="\n")
+for position in ["Past", "Present", "Future"]:
+    selected_card = card()
+    is_reversed = random.choice([True, False])
+    meaning = selected_card['meaning_rev'] if is_reversed else selected_card['meaning_up']
+    print(f"{position}: {selected_card['name']}")
+    print(f"Reversed: {is_reversed}")
+    print(f"Meaning: {meaning}")
+    print()  # Print an empty line for separation
